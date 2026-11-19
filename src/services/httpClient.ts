@@ -1,10 +1,9 @@
 import axios, {
-  AxiosError,
+  type AxiosError,
   type AxiosInstance,
   type CreateAxiosDefaults,
 } from 'axios'
-
-const DEFAULT_TIMEOUT_MS = 15_000
+import { env } from '@/lib/env.ts'
 
 export interface HttpClientErrorOptions {
   status: number | null
@@ -60,11 +59,10 @@ function readStringField(
 }
 
 export function resolveApiBaseUrl(rawUrl?: string): string {
-  const candidate = rawUrl ?? import.meta.env.VITE_API_BASE_URL
-  if (typeof candidate !== 'string') {
-    return ''
+  if (typeof rawUrl !== 'string') {
+    return env.apiBaseUrl
   }
-  return candidate.trim().replace(/\/+$/, '')
+  return rawUrl.trim().replace(/\/+$/, '')
 }
 
 export function normalizeHttpError(error: unknown): HttpClientError {
@@ -83,7 +81,11 @@ export function normalizeHttpError(error: unknown): HttpClientError {
     let code: string | null = error.code ?? null
 
     if (isRecord(data)) {
-      const serverMessage = readStringField(data, ['message', 'detail', 'error'])
+      const serverMessage = readStringField(data, [
+        'message',
+        'detail',
+        'error',
+      ])
       if (serverMessage) {
         message = serverMessage
       }
@@ -131,7 +133,7 @@ export function createHttpClient(
 ): AxiosInstance {
   const instance = axios.create({
     baseURL: resolveApiBaseUrl(),
-    timeout: DEFAULT_TIMEOUT_MS,
+    timeout: env.apiTimeoutMs,
     headers: {
       Accept: 'application/json',
     },

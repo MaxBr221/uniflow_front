@@ -12,7 +12,7 @@
 
 | Épico | Título | Versão | Total | Concluídas | Status |
 | --- | --- | --- | ---: | ---: | --- |
-| 1 | Configuração e estrutura do projeto | MVP | 12 | 3 | Em andamento (`FE-002`–`FE-004` concluídas; `FE-001` aguarda `FE-012`/testes) |
+| 1 | Configuração e estrutura do projeto | MVP | 12 | 12 | Concluído (`FE-001`–`FE-012`) |
 | 2 | Design System e componentes | MVP | 17 | 0 | Pendente |
 | 3 | Autenticação | MVP | 11 | 0 | Pendente |
 | 4 | Layout principal e navegação | MVP | 8 | 0 | Pendente |
@@ -28,24 +28,24 @@
 | 14 | Planejamento inteligente e IA | 2.0 | 7 | 0 | Pendente |
 | 15 | Monetização | Futura | 6 | 0 | Pendente |
 | 16 | Testes e qualidade | MVP | 9 | 0 | Pendente |
-| **Total** | | | **162** | **3** | |
+| **Total** | | | **162** | **12** | |
 
 ---
 
 ## Épico 1: Configuração e estrutura do projeto
 
-- [ ] **FE-001** — Criar projeto React com Vite e TypeScript *(Prioridade: Alta)* — **Status:** Setup instalado (`tsc -b`, `eslint`, `vite build` aprovados; validação com testes pendente de `FE-012`)
+- [x] **FE-001** — Criar projeto React com Vite e TypeScript *(Prioridade: Alta)*
 - [x] **FE-002** — Configurar Tailwind CSS *(Prioridade: Alta)*
 - [x] **FE-003** — Configurar React Router *(Prioridade: Alta)*
 - [x] **FE-004** — Configurar Axios *(Prioridade: Alta)*
-- [ ] **FE-005** — Configurar TanStack Query *(Prioridade: Alta)*
-- [ ] **FE-006** — Configurar React Hook Form *(Prioridade: Alta)*
-- [ ] **FE-007** — Configurar Zod *(Prioridade: Alta)*
-- [ ] **FE-008** — Configurar Lucide React *(Prioridade: Média)*
-- [ ] **FE-009** — Criar estrutura de pastas por domínio *(Prioridade: Alta)*
-- [ ] **FE-010** — Configurar variáveis de ambiente *(Prioridade: Alta)*
-- [ ] **FE-011** — Configurar ESLint e Prettier *(Prioridade: Média)*
-- [ ] **FE-012** — Configurar Vitest e Testing Library *(Prioridade: Alta)*
+- [x] **FE-005** — Configurar TanStack Query *(Prioridade: Alta)*
+- [x] **FE-006** — Configurar React Hook Form *(Prioridade: Alta)*
+- [x] **FE-007** — Configurar Zod *(Prioridade: Alta)*
+- [x] **FE-008** — Configurar Lucide React *(Prioridade: Média)*
+- [x] **FE-009** — Criar estrutura de pastas por domínio *(Prioridade: Alta)*
+- [x] **FE-010** — Configurar variáveis de ambiente *(Prioridade: Alta)*
+- [x] **FE-011** — Configurar ESLint e Prettier *(Prioridade: Média)*
+- [x] **FE-012** — Configurar Vitest e Testing Library *(Prioridade: Alta)*
 
 ---
 

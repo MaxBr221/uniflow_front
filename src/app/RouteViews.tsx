@@ -1,8 +1,18 @@
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Compass,
+  GraduationCap,
+  type LucideIcon,
+} from 'lucide-react'
 import type { ReactNode } from 'react'
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router'
+import { AppIcon } from '@/components/AppIcon.tsx'
+import { env } from '@/lib/env.ts'
 
 interface RouteCardProps {
   badge: string
+  badgeIcon: LucideIcon
   title: string
   titleId: string
   description: string
@@ -13,6 +23,7 @@ interface RouteCardProps {
 
 function RouteCard({
   badge,
+  badgeIcon,
   title,
   titleId,
   description,
@@ -35,8 +46,9 @@ function RouteCard({
         aria-labelledby={titleId}
       >
         <span
-          className={`mb-4 inline-block rounded-full px-2.5 py-1 text-xs font-semibold tracking-wider uppercase ${badgeClass}`}
+          className={`mb-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold tracking-wider uppercase ${badgeClass}`}
         >
+          <AppIcon icon={badgeIcon} size="xs" />
           {badge}
         </span>
         <h1
@@ -58,8 +70,9 @@ function BackHomeLink() {
   return (
     <Link
       to="/"
-      className="inline-flex items-center justify-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+      className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
     >
+      <AppIcon icon={ArrowLeft} size="sm" />
       Voltar ao início
     </Link>
   )
@@ -68,10 +81,11 @@ function BackHomeLink() {
 export function BaseHomeView() {
   return (
     <RouteCard
-      badge="UniFlow"
+      badge={env.appName}
+      badgeIcon={GraduationCap}
       titleId="app-title"
       title="Ambiente base configurado"
-      description="Projeto inicializado com React, TypeScript, Vite, Tailwind CSS e React Router. Pronto para as próximas etapas do backlog."
+      description="Projeto inicializado com React, TypeScript, Vite, Tailwind CSS, React Router, Axios, TanStack Query, React Hook Form, Zod e Lucide React."
     />
   )
 }
@@ -80,6 +94,7 @@ export function NotFoundView() {
   return (
     <RouteCard
       badge="Erro 404"
+      badgeIcon={Compass}
       titleId="not-found-title"
       title="Página não encontrada"
       description="O endereço acessado não existe ou ainda não foi implementado."
@@ -106,6 +121,7 @@ export function RouteErrorView() {
   return (
     <RouteCard
       badge="Erro de navegação"
+      badgeIcon={AlertTriangle}
       titleId="route-error-title"
       title={title}
       description={description}

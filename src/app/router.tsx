@@ -1,5 +1,9 @@
 import { createBrowserRouter, type RouteObject } from 'react-router'
-import { BaseHomeView, NotFoundView, RouteErrorView } from './RouteViews.tsx'
+import {
+  BaseHomeView,
+  NotFoundView,
+  RouteErrorView,
+} from '@/app/RouteViews.tsx'
 
 export const appRoutes: RouteObject[] = [
   {
