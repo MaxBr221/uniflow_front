@@ -1,3 +1,4 @@
+export { BRAND_IDENTITY, type BrandIdentity } from '@/lib/brand.ts'
 export {
   DEFAULT_API_TIMEOUT_MS,
   DEFAULT_APP_NAME,

@@ -6,6 +6,8 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: 'jsdom',
+      pool: 'threads',
+      maxWorkers: 2,
       globals: false,
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}'],

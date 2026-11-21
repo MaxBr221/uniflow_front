@@ -8,43 +8,46 @@ import {
 import type { ReactNode } from 'react'
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router'
 import { AppIcon } from '@/components/AppIcon.tsx'
-import { env } from '@/lib/env.ts'
+import { BrandLogo } from '@/components/BrandLogo.tsx'
 
 interface RouteCardProps {
+  header?: ReactNode
   badge: string
   badgeIcon: LucideIcon
   title: string
   titleId: string
   description: string
-  tone?: 'violet' | 'rose'
+  tone?: 'brand' | 'danger'
   centered?: boolean
   action?: ReactNode
 }
 
 function RouteCard({
+  header,
   badge,
   badgeIcon,
   title,
   titleId,
   description,
-  tone = 'violet',
+  tone = 'brand',
   centered = false,
   action,
 }: RouteCardProps) {
   const borderClass =
-    tone === 'rose' ? 'border-rose-200' : 'border-violet-200/80'
+    tone === 'danger' ? 'border-danger-200' : 'border-border-subtle'
   const badgeClass =
-    tone === 'rose'
-      ? 'bg-rose-100 text-rose-700'
-      : 'bg-violet-100 text-violet-700'
+    tone === 'danger'
+      ? 'bg-danger-100 text-danger-700'
+      : 'bg-brand-100 text-brand-700'
 
   return (
     <main className="flex min-h-svh items-center justify-center p-4 sm:p-6">
       <section
-        className={`w-full ${centered ? 'max-w-md text-center' : 'max-w-lg'} rounded-2xl border ${borderClass} bg-white p-6 shadow-sm sm:p-8`}
-        role={tone === 'rose' ? 'alert' : undefined}
+        className={`bg-surface-card w-full ${centered ? 'max-w-md text-center' : 'max-w-lg'} rounded-2xl border ${borderClass} p-6 shadow-sm sm:p-8`}
+        role={tone === 'danger' ? 'alert' : undefined}
         aria-labelledby={titleId}
       >
+        {header ? <div className="mb-5">{header}</div> : null}
         <span
           className={`mb-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold tracking-wider uppercase ${badgeClass}`}
         >
@@ -53,11 +56,11 @@ function RouteCard({
         </span>
         <h1
           id={titleId}
-          className="mb-3 text-xl leading-snug font-semibold text-slate-900 sm:text-2xl"
+          className="font-display text-heading-md sm:text-heading-lg text-ink-primary mb-3 font-semibold"
         >
           {title}
         </h1>
-        <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
+        <p className="text-body-sm sm:text-body text-ink-secondary">
           {description}
         </p>
         {action ? <div className="mt-6">{action}</div> : null}
@@ -70,7 +73,7 @@ function BackHomeLink() {
   return (
     <Link
       to="/"
-      className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+      className="bg-brand-600 text-ink-inverse hover:bg-brand-700 focus-visible:outline-border-focus inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
     >
       <AppIcon icon={ArrowLeft} size="sm" />
       Voltar ao início
@@ -81,11 +84,12 @@ function BackHomeLink() {
 export function BaseHomeView() {
   return (
     <RouteCard
-      badge={env.appName}
+      header={<BrandLogo size="md" showTagline />}
+      badge="Plataforma acadêmica"
       badgeIcon={GraduationCap}
       titleId="app-title"
       title="Ambiente base configurado"
-      description="Projeto inicializado com React, TypeScript, Vite, Tailwind CSS, React Router, Axios, TanStack Query, React Hook Form, Zod e Lucide React."
+      description="Projeto inicializado com React, TypeScript, Vite, Tailwind CSS, React Router, Axios, TanStack Query, React Hook Form, Zod, Lucide React e identidade visual UniFlow."
     />
   )
 }
@@ -125,7 +129,7 @@ export function RouteErrorView() {
       titleId="route-error-title"
       title={title}
       description={description}
-      tone="rose"
+      tone="danger"
       centered
       action={<BackHomeLink />}
     />

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="uniflow-favicon-gradient" x1="3" y1="2" x2="29" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#uniflow-favicon-gradient)" />
+  <path
+    d="M9.5 10.5V16.5C9.5 20.09 12.41 23 16 23C19.59 23 22.5 20.09 22.5 16.5V10.5"
+    stroke="#ffffff"
+    stroke-width="2.6"
+    stroke-linecap="round"
+  />
+  <path
+    d="M13 13.25C14.2 11.4 16 10.25 18 10.25"
+    stroke="#ddd6fe"
+    stroke-width="2.2"
+    stroke-linecap="round"
+  />
+  <circle cx="22.5" cy="10.25" r="1.75" fill="#ede9fe" />
+</svg>
