@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { isRouteErrorResponse, useRouteError } from 'react-router'
-import { AppIcon } from '@/components/AppIcon.tsx'
+import { Badge } from '@/components/Badge.tsx'
 import { BrandLogo } from '@/components/BrandLogo.tsx'
 import { ButtonLink } from '@/components/Button.tsx'
 import { SPACING_CLASSES } from '@/styles/spacing.ts'
@@ -37,10 +37,6 @@ function RouteCard({
 }: RouteCardProps) {
   const borderClass =
     tone === 'danger' ? 'border-danger-200' : 'border-border-subtle'
-  const badgeClass =
-    tone === 'danger'
-      ? 'bg-danger-100 text-danger-700'
-      : 'bg-brand-100 text-brand-700'
 
   return (
     <main className={SPACING_CLASSES.centeredShell}>
@@ -50,12 +46,14 @@ function RouteCard({
         aria-labelledby={titleId}
       >
         {header ? <div className="mb-5">{header}</div> : null}
-        <span
-          className={`mb-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold tracking-wider uppercase ${badgeClass}`}
+        <Badge
+          tone={tone === 'danger' ? 'danger' : 'brand'}
+          leftIcon={badgeIcon}
+          uppercase
+          className="mb-4"
         >
-          <AppIcon icon={badgeIcon} size="xs" />
           {badge}
-        </span>
+        </Badge>
         <h1
           id={titleId}
           className="font-display text-heading-md sm:text-heading-lg text-ink-primary mb-3 font-semibold"

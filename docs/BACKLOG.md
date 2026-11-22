@@ -13,7 +13,7 @@
 | Épico | Título | Versão | Total | Concluídas | Status |
 | --- | --- | --- | ---: | ---: | --- |
 | 1 | Configuração e estrutura do projeto | MVP | 12 | 12 | Concluído (`FE-001`–`FE-012`) |
-| 2 | Design System e componentes | MVP | 17 | 8 | Em andamento (`FE-013`–`FE-020` concluídas) |
+| 2 | Design System e componentes | MVP | 17 | 12 | Em andamento (`FE-013`–`FE-024` concluídas) |
 | 3 | Autenticação | MVP | 11 | 0 | Pendente |
 | 4 | Layout principal e navegação | MVP | 8 | 0 | Pendente |
 | 5 | Dashboard | MVP | 10 | 0 | Pendente |
@@ -28,7 +28,7 @@
 | 14 | Planejamento inteligente e IA | 2.0 | 7 | 0 | Pendente |
 | 15 | Monetização | Futura | 6 | 0 | Pendente |
 | 16 | Testes e qualidade | MVP | 9 | 0 | Pendente |
-| **Total** | | | **162** | **20** | |
+| **Total** | | | **162** | **24** | |
 
 ---
 
@@ -59,10 +59,10 @@
 - [x] **FE-018** — Criar componente Input *(Prioridade: Alta)*
 - [x] **FE-019** — Criar componente Select *(Prioridade: Alta)*
 - [x] **FE-020** — Criar componente Textarea *(Prioridade: Média)*
-- [ ] **FE-021** — Criar componente Modal *(Prioridade: Alta)*
-- [ ] **FE-022** — Criar componente Dropdown *(Prioridade: Média)*
-- [ ] **FE-023** — Criar componente Card *(Prioridade: Alta)*
-- [ ] **FE-024** — Criar componente Badge *(Prioridade: Média)*
+- [x] **FE-021** — Criar componente Modal *(Prioridade: Alta)*
+- [x] **FE-022** — Criar componente Dropdown *(Prioridade: Média)*
+- [x] **FE-023** — Criar componente Card *(Prioridade: Alta)*
+- [x] **FE-024** — Criar componente Badge *(Prioridade: Média)*
 - [ ] **FE-025** — Criar componente Toast *(Prioridade: Alta)*
 - [ ] **FE-026** — Criar componente Loading *(Prioridade: Alta)*
 - [ ] **FE-027** — Criar componente Empty State *(Prioridade: Alta)*

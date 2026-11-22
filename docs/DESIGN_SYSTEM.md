@@ -159,3 +159,27 @@ Implementado em `src/components/Select.tsx` (reexportado em `@/components`):
 Implementado em `src/components/Textarea.tsx` (reexportado em `@/components`):
 - Reutiliza `FormField` e `getFormControlClassName(..., { multiline: true })` com altura mínima adaptada por tamanho (`sm`, `md`, `lg`) e controle de redimensionamento (`resize`: `none`, `vertical`, `both`).
 - Suporte opcional a `showCount` (`tabular-nums` no rodapé do campo, compatível tanto com estado controlado quanto com `register()` do React Hook Form).
+
+### `Modal` (`FE-021`)
+Implementado em `src/components/Modal.tsx` (reexportado em `@/components`):
+- Renderizado via `createPortal` sobre overlay translúcido (`bg-ink-primary/45` com leve desfoque) e painel `surface-card` com borda `border-subtle`, cabeçalho e rodapé opcionais e corpo rolável (`overflow-y-auto`) adaptado para desktop, tablet e celular (`items-end sm:items-center`, limites de `100svh`).
+- Tamanhos disponíveis (`size`): `sm` (`max-w-md`), `md` (`max-w-lg`, padrão), `lg` (`max-w-2xl`) e `xl` (`max-w-4xl`), além de suporte a `role="dialog"` ou `role="alertdialog"`.
+- Acessibilidade e usabilidade nativas: `aria-modal="true"`, associação automática de `aria-labelledby`/`aria-describedby` (ou `ariaLabel`), aprisionamento de foco por `Tab`/`Shift+Tab`, foco inicial (`initialFocusRef` ou primeiro controle do corpo), restauração de foco ao fechar, bloqueio de scroll no `body` e pilha segura para modais aninhados (`Escape` e fechamento opcional por backdrop).
+
+### `Dropdown` (`FE-022`)
+Implementado em `src/components/Dropdown.tsx` (reexportado em `@/components`):
+- Menu suspenso reutilizável para ações de item, filtros e menu de perfil, com alinhamento configurável (`align`: `left` | `right`, `side`: `bottom` | `top`), largura máxima adaptada ao viewport (`max-w-[calc(100vw-2rem)]`) e rolagem interna (`max-h-72 overflow-y-auto`).
+- Trigger flexível: usa `Button` por padrão (`label`, `triggerVariant`, `triggerSize`, `triggerIcon`, chevron animado) ou `renderTrigger` customizado mantendo `aria-haspopup="menu"`, `aria-expanded` e `aria-controls`.
+- Suporte a itens de ação (`onSelect`, `to` via React Router, `href`), estado `selected` com ícone de confirmação, tom `danger`, `disabled`, separadores (`separator`), rótulos de seção (`label`), `header` opcional e navegação completa por teclado (`ArrowDown`, `ArrowUp`, `Home`, `End`, busca por inicial, `Tab` e `Escape`).
+
+### `Card` (`FE-023`)
+Implementado em `src/components/Card.tsx` (reexportado em `@/components`):
+- Superfície base arredondada (`rounded-2xl`) com bordas suaves (`border-subtle`), alinhada aos tokens semânticos (`tone`: `default`, `subtle`, `brand`, `success`, `warning`, `danger`, `info`), espaçamentos responsivos (`padding`: `none`, `compact`, `default` usando `SPACING_CLASSES`), elevação sutil (`elevation`: `none`, `sm`, `md`) e modo `interactive`.
+- Suporta uso declarativo (`title`, `titleAs`, `description`, `headerAction`, `footer`, `divided`) com associação automática de `aria-labelledby` ou composição explícita via `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` (`flex-1` para alinhamento em grids) e `CardFooter`.
+
+### `Badge` (`FE-024`)
+Implementado em `src/components/Badge.tsx` (reexportado em `@/components`) e aplicado nos cartões base de `src/app/RouteViews.tsx`:
+- Rótulo compacto em formato pílula para status acadêmicos, tipos de atividade, contadores (`tabular-nums`) e códigos (`mono`).
+- **Aparências (`appearance`):** `soft` (padrão), `outline` e `solid`.
+- **Tons (`tone`):** `neutral` (padrão), `brand`, `success`, `warning`, `danger` e `info`.
+- **Tamanhos e extras:** `size` (`sm`, `md`, `lg`), indicador visual `dot`, `leftIcon`/`rightIcon` via `AppIcon`, `uppercase` e `mono`.
