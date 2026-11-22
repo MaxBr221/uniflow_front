@@ -6,9 +6,11 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { isRouteErrorResponse, Link, useRouteError } from 'react-router'
+import { isRouteErrorResponse, useRouteError } from 'react-router'
 import { AppIcon } from '@/components/AppIcon.tsx'
 import { BrandLogo } from '@/components/BrandLogo.tsx'
+import { ButtonLink } from '@/components/Button.tsx'
+import { SPACING_CLASSES } from '@/styles/spacing.ts'
 
 interface RouteCardProps {
   header?: ReactNode
@@ -41,9 +43,9 @@ function RouteCard({
       : 'bg-brand-100 text-brand-700'
 
   return (
-    <main className="flex min-h-svh items-center justify-center p-4 sm:p-6">
+    <main className={SPACING_CLASSES.centeredShell}>
       <section
-        className={`bg-surface-card w-full ${centered ? 'max-w-md text-center' : 'max-w-lg'} rounded-2xl border ${borderClass} p-6 shadow-sm sm:p-8`}
+        className={`bg-surface-card w-full ${centered ? 'max-w-md text-center' : 'max-w-lg'} rounded-2xl border ${borderClass} ${SPACING_CLASSES.cardPadding} shadow-sm`}
         role={tone === 'danger' ? 'alert' : undefined}
         aria-labelledby={titleId}
       >
@@ -71,13 +73,9 @@ function RouteCard({
 
 function BackHomeLink() {
   return (
-    <Link
-      to="/"
-      className="bg-brand-600 text-ink-inverse hover:bg-brand-700 focus-visible:outline-border-focus inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-    >
-      <AppIcon icon={ArrowLeft} size="sm" />
+    <ButtonLink to="/" leftIcon={ArrowLeft}>
       Voltar ao início
-    </Link>
+    </ButtonLink>
   )
 }
 

@@ -107,7 +107,55 @@ O UniFlow utiliza duas fontes variáveis auto-hospedadas via `@fontsource-variab
 Para evitar repetição de combinações utilitárias nos componentes e features, use `TYPOGRAPHY_CLASSES` (`display`, `headingLg`, `headingMd`, `headingSm`, `body`, `bodySm`, `caption`, `label`, `metric`) importado de `@/styles`. Note que `metric` inclui `tabular-nums` para alinhamento numérico em contadores de dashboard.
 
 ## 4. Sistema de Espaçamentos (`FE-016`)
-> *Pendente — será detalhado na execução da tarefa `FE-016`.*
+
+O sistema de espaçamentos segue uma **grade base de `4px` (`0.25rem`)**, com tokens semânticos definidos no `@theme` em `src/styles/index.css` e espelhados com presets responsivos em `src/styles/spacing.ts` (`SPACING_TOKENS` e `SPACING_CLASSES`).
+
+### Espaçamento Interno (`inset`)
+| Token | Valor | Uso principal |
+| --- | --- | --- |
+| `inset-xs` | `0.5rem` (`8px`) | Chips, badges maiores e controles compactos |
+| `inset-sm` | `0.75rem` (`12px`) | Padding interno de inputs, selects e itens de menu |
+| `inset-md` | `1rem` (`16px`) | Padding lateral em mobile e cards compactos |
+| `inset-lg` | `1.5rem` (`24px`) | Padding padrão de cards e painéis |
+| `inset-xl` | `2rem` (`32px`) | Containers amplos, modais e telas de autenticação no desktop |
+
+### Ritmo Vertical e Entre Elementos (`stack`)
+| Token | Valor | Uso principal |
+| --- | --- | --- |
+| `stack-xs` | `0.25rem` (`4px`) | Distância entre label, campo e mensagem de erro/ajuda |
+| `stack-sm` | `0.5rem` (`8px`) | Gap entre ícone e texto, botões em linha |
+| `stack-md` | `1rem` (`16px`) | Distância entre campos de formulário e cards em grade |
+| `stack-lg` | `1.5rem` (`24px`) | Separação entre blocos e seções internas |
+| `stack-xl` | `2rem` (`32px`) | Separação entre seções principais da página |
+
+### Dimensões de Layout
+- **`sidebar`:** `16rem` (`256px`) — largura da navegação lateral em desktop
+- **`header`:** `4rem` (`64px`) — altura padrão do cabeçalho superior
+- **`content`:** `75rem` (`1200px`) — largura máxima da área de conteúdo principal
+
+### Presets TypeScript (`SPACING_CLASSES`)
+Exportados via `@/styles`: `pageContainer`, `centeredShell`, `cardPadding`, `cardPaddingCompact`, `sectionStack`, `formStack`, `fieldStack`, `inlineGroup` e `cardGrid` — garantindo adaptação fluida entre celular, tablet e desktop.
 
 ## 5. Biblioteca de Componentes (`FE-017`–`FE-029`)
-> *Pendente — será documentada conforme os componentes do Épico 2 forem implementados.*
+
+### `Button` e `ButtonLink` (`FE-017`)
+Implementados em `src/components/Button.tsx` (reexportados em `@/components`):
+- **Variantes (`variant`):** `primary` (padrão, destaque `brand-600`), `secondary` (`brand-50` com borda `brand-200`), `outline` (`surface-card` com borda suave), `ghost` e `danger`.
+- **Tamanhos (`size`):** `sm` (`36px`), `md` (`40px`, padrão), `lg` (`44px`, ideal para toque móvel/CTAs principais) e `icon` (`40x40px`).
+- **Estados e props:** `type` padrão `'button'`, `fullWidth`, `isLoading` + `loadingText` (aplica `disabled` e `aria-busy="true"` com spinner `Loader2`), `leftIcon` e `rightIcon` via `AppIcon`.
+- **`ButtonLink`:** compartilha os mesmos estilos visuais sobre `<Link>` do React Router para navegação sem duplicação de classes.
+
+### `FormField` e `Input` (`FE-018`)
+Implementados em `src/components/FormField.tsx`, `src/components/formControlStyles.ts` e `src/components/Input.tsx` (reexportados em `@/components`):
+- **`FormField`:** wrapper acessível compartilhado entre controles de formulário, gerando IDs únicos (`useId`), rótulo com marcador obrigatório, texto auxiliar e erro (`role="alert"` + `aria-describedby`).
+- **`Input`:** campo de texto compatível com React Hook Form (`ref` direto), tamanhos (`sm`, `md`, `lg`), `leftIcon`, `rightIcon`, `rightSlot`, `passwordToggle` (botão acessível para exibir/ocultar senha) e estados `error` (`aria-invalid="true"`) e `disabled`.
+
+### `Select` (`FE-019`)
+Implementado em `src/components/Select.tsx` (reexportado em `@/components`):
+- Reutiliza `FormField` e `getFormControlClassName`, garantindo consistência visual e acessibilidade (`label`, `helperText`, `error`, `aria-invalid`, `aria-describedby`).
+- Suporta `options` tipadas (`SelectOption`) ou `children` customizados (`<option>`, `<optgroup>`), `placeholder`, `leftIcon`, tamanhos (`sm`, `md`, `lg`) e integração direta com React Hook Form (`ref`).
+
+### `Textarea` (`FE-020`)
+Implementado em `src/components/Textarea.tsx` (reexportado em `@/components`):
+- Reutiliza `FormField` e `getFormControlClassName(..., { multiline: true })` com altura mínima adaptada por tamanho (`sm`, `md`, `lg`) e controle de redimensionamento (`resize`: `none`, `vertical`, `both`).
+- Suporte opcional a `showCount` (`tabular-nums` no rodapé do campo, compatível tanto com estado controlado quanto com `register()` do React Hook Form).
