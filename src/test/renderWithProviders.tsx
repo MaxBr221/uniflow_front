@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { appRoutes } from '@/app/router.tsx'
+import { ToastProvider } from '@/components/Toast.tsx'
 import { createQueryClient } from '@/lib/queryClient.ts'
 
 export interface RenderWithProvidersOptions extends Omit<
@@ -31,7 +32,9 @@ export function renderAppRoute(
 
   const result = render(
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
     </QueryClientProvider>,
     options,
   )
@@ -57,7 +60,9 @@ export function renderWithQueryClient(
   const user = userEvent.setup()
 
   const result = render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>{ui}</ToastProvider>
+    </QueryClientProvider>,
     options,
   )
 

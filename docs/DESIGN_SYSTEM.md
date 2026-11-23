@@ -183,3 +183,9 @@ Implementado em `src/components/Badge.tsx` (reexportado em `@/components`) e apl
 - **Aparências (`appearance`):** `soft` (padrão), `outline` e `solid`.
 - **Tons (`tone`):** `neutral` (padrão), `brand`, `success`, `warning`, `danger` e `info`.
 - **Tamanhos e extras:** `size` (`sm`, `md`, `lg`), indicador visual `dot`, `leftIcon`/`rightIcon` via `AppIcon`, `uppercase` e `mono`.
+
+### `Toast` (`FE-025`)
+Implementado com separação limpa entre store reativa (`src/lib/toast.ts`), hook (`src/hooks/useToast.ts`) e UI (`src/components/Toast.tsx`), com `<ToastProvider>` montado na raiz da aplicação (`src/app/App.tsx`):
+- **Variantes (`variant`):** `info` (`role="status"`), `success` (`role="status"`), `warning` (`role="status"`) e `error` (`role="alert"` com `aria-live="assertive"`), exibidos sobre `surface-card` com bordas e emblema semântico.
+- **Posicionamento responsivo (`position`):** `top-right` (padrão), `top-center`, `bottom-right` e `bottom-center`, ocupando a largura útil com margem segura em telas móveis e largura limitada (`max-w-sm`/`max-w-md`) em tablet/desktop em camada `z-60` (acima de modais).
+- **Comportamento:** fila limitada por `maxVisible` (padrão `4`), deduplicação/atualização por `id`, botão opcional de ação (`action`), fechamento manual (`dismissible`), auto-dismiss configurável (`5000ms` padrão ou `0` para persistente) e pausa automática no `hover`/`focus`.
