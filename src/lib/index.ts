@@ -7,6 +7,7 @@ export {
   type AppEnv,
 } from '@/lib/env.ts'
 export {
+  applyHttpFieldErrors,
   DEFAULT_FORM_OPTIONS,
   getFieldErrorMessage,
   useAppForm,

@@ -1,18 +1,30 @@
 import { ArrowRight, Lock, Mail, User } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Button } from '@/components/Button.tsx'
 import { ErrorState } from '@/components/ErrorState.tsx'
 import { Input } from '@/components/Input.tsx'
 import { AuthShell } from '@/features/auth/components/AuthShell.tsx'
-import { useAppForm } from '@/lib/formConfig.ts'
+import { useRegisterMutation } from '@/features/auth/hooks/useRegisterMutation.ts'
+import {
+  registerSchema,
+  type RegisterFormValues,
+} from '@/features/auth/schemas/authSchemas.ts'
+import { useToast } from '@/hooks/useToast.ts'
+import {
+  applyHttpFieldErrors,
+  getFieldErrorMessage,
+  useAppForm,
+} from '@/lib/formConfig.ts'
+import { zodResolver } from '@/lib/validation.ts'
 import { SPACING_CLASSES } from '@/styles/spacing.ts'
 
-export interface RegisterFormValues {
-  name: string
-  email: string
-  password: string
-  confirmPassword: string
+export type { RegisterFormValues } from '@/features/auth/schemas/authSchemas.ts'
+
+const BACKEND_FIELD_TO_FORM: Record<string, keyof RegisterFormValues> = {
+  nome: 'name',
+  email: 'email',
+  senha: 'password',
 }
 
 export interface RegisterPageProps {
@@ -20,13 +32,18 @@ export interface RegisterPageProps {
 }
 
 export function RegisterPage({ onSubmitRegister }: RegisterPageProps) {
-  const [submitNotice, setSubmitNotice] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const { success } = useToast()
+  const registerMutation = useRegisterMutation()
+  const [submitError, setSubmitError] = useState<unknown>(null)
 
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    setError,
+    formState: { errors, isSubmitting },
   } = useAppForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
       email: '',
@@ -35,17 +52,28 @@ export function RegisterPage({ onSubmitRegister }: RegisterPageProps) {
     },
   })
 
+  const isPending = isSubmitting || registerMutation.isPending
+
   async function handleFormSubmit(values: RegisterFormValues): Promise<void> {
-    setSubmitNotice(null)
+    setSubmitError(null)
+    registerMutation.reset()
 
-    if (!onSubmitRegister) {
-      setSubmitNotice(
-        'O envio para a API será habilitado após a integração do contrato de autenticação (FE-034).',
-      )
-      return
+    try {
+      if (onSubmitRegister) {
+        await onSubmitRegister(values)
+        return
+      }
+
+      const createdUser = await registerMutation.mutateAsync(values)
+      success('Conta criada com sucesso!', {
+        description: `Bem-vindo(a), ${createdUser.nome}! Faça login para acessar sua conta.`,
+      })
+      navigate('/login', { state: { registeredEmail: createdUser.email } })
+    } catch (error) {
+      if (applyHttpFieldErrors(error, BACKEND_FIELD_TO_FORM, setError)) {
+        setSubmitError(error)
+      }
     }
-
-    await onSubmitRegister(values)
   }
 
   return (
@@ -67,17 +95,16 @@ export function RegisterPage({ onSubmitRegister }: RegisterPageProps) {
     >
       <form
         onSubmit={handleSubmit(handleFormSubmit)}
+        noValidate
         className={SPACING_CLASSES.formStack}
         aria-label="Formulário de cadastro"
       >
-        {submitNotice ? (
+        {submitError ? (
           <ErrorState
             variant="banner"
-            tone="warning"
+            tone="danger"
             size="sm"
-            errorCode="FE-034"
-            title="Integração pendente"
-            description={submitNotice}
+            error={submitError}
           />
         ) : null}
 
@@ -87,8 +114,9 @@ export function RegisterPage({ onSubmitRegister }: RegisterPageProps) {
           autoComplete="name"
           placeholder="Ex.: Ana Clara Silva"
           leftIcon={User}
+          error={getFieldErrorMessage(errors.name)}
           required
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('name')}
         />
 
@@ -98,8 +126,9 @@ export function RegisterPage({ onSubmitRegister }: RegisterPageProps) {
           autoComplete="email"
           placeholder="voce@universidade.edu.br"
           leftIcon={Mail}
+          error={getFieldErrorMessage(errors.email)}
           required
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('email')}
         />
 
@@ -108,11 +137,12 @@ export function RegisterPage({ onSubmitRegister }: RegisterPageProps) {
           type="password"
           autoComplete="new-password"
           placeholder="Crie uma senha segura"
-          helperText="Use no mínimo 8 caracteres com letras e números."
+          helperText="Use de 8 a 72 caracteres com maiúscula, minúscula, número e símbolo, sem espaços."
           leftIcon={Lock}
           passwordToggle
+          error={getFieldErrorMessage(errors.password)}
           required
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('password')}
         />
 
@@ -123,8 +153,9 @@ export function RegisterPage({ onSubmitRegister }: RegisterPageProps) {
           placeholder="Repita sua senha"
           leftIcon={Lock}
           passwordToggle
+          error={getFieldErrorMessage(errors.confirmPassword)}
           required
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('confirmPassword')}
         />
 
@@ -133,7 +164,7 @@ export function RegisterPage({ onSubmitRegister }: RegisterPageProps) {
           size="lg"
           fullWidth
           rightIcon={ArrowRight}
-          isLoading={isSubmitting}
+          isLoading={isPending}
           loadingText="Criando conta..."
           className="mt-stack-xs"
         >

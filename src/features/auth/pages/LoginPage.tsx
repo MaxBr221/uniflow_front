@@ -1,47 +1,103 @@
 import { ArrowRight, Lock, Mail } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { Button } from '@/components/Button.tsx'
 import { ErrorState } from '@/components/ErrorState.tsx'
 import { Input } from '@/components/Input.tsx'
 import { AuthShell } from '@/features/auth/components/AuthShell.tsx'
-import { useAppForm } from '@/lib/formConfig.ts'
+import { useLoginMutation } from '@/features/auth/hooks/useLoginMutation.ts'
+import {
+  loginSchema,
+  type LoginFormValues,
+} from '@/features/auth/schemas/authSchemas.ts'
+import { useToast } from '@/hooks/useToast.ts'
+import {
+  applyHttpFieldErrors,
+  getFieldErrorMessage,
+  useAppForm,
+} from '@/lib/formConfig.ts'
+import { zodResolver } from '@/lib/validation.ts'
 import { SPACING_CLASSES } from '@/styles/spacing.ts'
 
-export interface LoginFormValues {
-  email: string
-  password: string
+export type { LoginFormValues } from '@/features/auth/schemas/authSchemas.ts'
+
+const BACKEND_LOGIN_FIELD_TO_FORM: Record<string, keyof LoginFormValues> = {
+  email: 'email',
+  senha: 'password',
 }
 
 export interface LoginPageProps {
   onSubmitLogin?: (values: LoginFormValues) => Promise<void> | void
 }
 
+function getPrefilledEmail(state: unknown): string {
+  if (
+    typeof state === 'object' &&
+    state !== null &&
+    'registeredEmail' in state &&
+    typeof state.registeredEmail === 'string'
+  ) {
+    return state.registeredEmail
+  }
+  return ''
+}
+
+function getRedirectTarget(state: unknown): string {
+  if (
+    typeof state === 'object' &&
+    state !== null &&
+    'from' in state &&
+    typeof state.from === 'string' &&
+    state.from.startsWith('/') &&
+    !state.from.startsWith('//')
+  ) {
+    return state.from
+  }
+  return '/'
+}
+
 export function LoginPage({ onSubmitLogin }: LoginPageProps) {
-  const [submitNotice, setSubmitNotice] = useState<string | null>(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { success } = useToast()
+  const loginMutation = useLoginMutation()
+  const [submitError, setSubmitError] = useState<unknown>(null)
 
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    setError,
+    formState: { errors, isSubmitting },
   } = useAppForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      email: getPrefilledEmail(location.state),
       password: '',
     },
   })
 
+  const isPending = isSubmitting || loginMutation.isPending
+
   async function handleFormSubmit(values: LoginFormValues): Promise<void> {
-    setSubmitNotice(null)
+    setSubmitError(null)
+    loginMutation.reset()
 
-    if (!onSubmitLogin) {
-      setSubmitNotice(
-        'A autenticação com a API será habilitada após a integração do contrato de autenticação (FE-035).',
-      )
-      return
+    try {
+      if (onSubmitLogin) {
+        await onSubmitLogin(values)
+        return
+      }
+
+      const tokenResponse = await loginMutation.mutateAsync(values)
+      success('Login realizado com sucesso!', {
+        description: `Bem-vindo(a), ${tokenResponse.usuario.nome}!`,
+      })
+      navigate(getRedirectTarget(location.state), { replace: true })
+    } catch (error) {
+      if (applyHttpFieldErrors(error, BACKEND_LOGIN_FIELD_TO_FORM, setError)) {
+        setSubmitError(error)
+      }
     }
-
-    await onSubmitLogin(values)
   }
 
   return (
@@ -63,17 +119,16 @@ export function LoginPage({ onSubmitLogin }: LoginPageProps) {
     >
       <form
         onSubmit={handleSubmit(handleFormSubmit)}
+        noValidate
         className={SPACING_CLASSES.formStack}
         aria-label="Formulário de login"
       >
-        {submitNotice ? (
+        {submitError ? (
           <ErrorState
             variant="banner"
-            tone="warning"
+            tone="danger"
             size="sm"
-            errorCode="FE-035"
-            title="Integração pendente"
-            description={submitNotice}
+            error={submitError}
           />
         ) : null}
 
@@ -83,8 +138,9 @@ export function LoginPage({ onSubmitLogin }: LoginPageProps) {
           autoComplete="email"
           placeholder="voce@universidade.edu.br"
           leftIcon={Mail}
+          error={getFieldErrorMessage(errors.email)}
           required
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('email')}
         />
 
@@ -96,8 +152,9 @@ export function LoginPage({ onSubmitLogin }: LoginPageProps) {
             placeholder="Digite sua senha"
             leftIcon={Lock}
             passwordToggle
+            error={getFieldErrorMessage(errors.password)}
             required
-            disabled={isSubmitting}
+            disabled={isPending}
             {...register('password')}
           />
           <div className="flex justify-end">
@@ -115,7 +172,7 @@ export function LoginPage({ onSubmitLogin }: LoginPageProps) {
           size="lg"
           fullWidth
           rightIcon={ArrowRight}
-          isLoading={isSubmitting}
+          isLoading={isPending}
           loadingText="Entrando..."
         >
           Entrar

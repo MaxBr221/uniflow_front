@@ -5,6 +5,13 @@ import axios, {
 } from 'axios'
 import { env } from '@/lib/env.ts'
 
+export const API_PREFIX = '/api/v1'
+
+export interface ApiFieldError {
+  field: string
+  message: string
+}
+
 export interface HttpClientErrorOptions {
   status: number | null
   code: string | null
@@ -59,10 +66,43 @@ function readStringField(
 }
 
 export function resolveApiBaseUrl(rawUrl?: string): string {
-  if (typeof rawUrl !== 'string') {
-    return env.apiBaseUrl
+  const base =
+    typeof rawUrl === 'string'
+      ? rawUrl.trim().replace(/\/+$/, '')
+      : env.apiBaseUrl
+
+  if (base === '') {
+    return API_PREFIX
   }
-  return rawUrl.trim().replace(/\/+$/, '')
+  if (base.endsWith(API_PREFIX)) {
+    return base
+  }
+  return `${base}${API_PREFIX}`
+}
+
+export function getHttpFieldErrors(error: unknown): ApiFieldError[] {
+  if (!isHttpClientError(error) || !isRecord(error.details)) {
+    return []
+  }
+
+  const rawFieldErrors = error.details.fieldErrors
+  if (!Array.isArray(rawFieldErrors)) {
+    return []
+  }
+
+  const parsedErrors: ApiFieldError[] = []
+  for (const item of rawFieldErrors) {
+    if (!isRecord(item)) {
+      continue
+    }
+    const field = readStringField(item, ['field'])
+    const message = readStringField(item, ['message'])
+    if (field && message) {
+      parsedErrors.push({ field, message })
+    }
+  }
+
+  return parsedErrors
 }
 
 export function normalizeHttpError(error: unknown): HttpClientError {

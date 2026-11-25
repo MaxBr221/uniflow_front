@@ -14,7 +14,7 @@
 | --- | --- | --- | ---: | ---: | --- |
 | 1 | Configuração e estrutura do projeto | MVP | 12 | 12 | Concluído (`FE-001`–`FE-012`) |
 | 2 | Design System e componentes | MVP | 17 | 17 | Concluído (`FE-013`–`FE-029`) |
-| 3 | Autenticação | MVP | 11 | 2 | Em andamento (`FE-030`–`FE-031` concluídas) |
+| 3 | Autenticação | MVP | 11 | 7 | Em andamento (`FE-030`–`FE-036` concluídas) |
 | 4 | Layout principal e navegação | MVP | 8 | 0 | Pendente |
 | 5 | Dashboard | MVP | 10 | 0 | Pendente |
 | 6 | Semestres | MVP | 8 | 0 | Pendente |
@@ -28,7 +28,7 @@
 | 14 | Planejamento inteligente e IA | 2.0 | 7 | 0 | Pendente |
 | 15 | Monetização | Futura | 6 | 0 | Pendente |
 | 16 | Testes e qualidade | MVP | 9 | 0 | Pendente |
-| **Total** | | | **162** | **31** | |
+| **Total** | | | **162** | **36** | |
 
 ---
 
@@ -75,11 +75,11 @@
 
 - [x] **FE-030** — Criar página de cadastro *(Prioridade: Alta)*
 - [x] **FE-031** — Criar página de login *(Prioridade: Alta)*
-- [ ] **FE-032** — Criar validação de formulário de cadastro *(Prioridade: Alta)*
-- [ ] **FE-033** — Criar validação de formulário de login *(Prioridade: Alta)*
-- [ ] **FE-034** — Integrar cadastro com API *(Prioridade: Alta)*
-- [ ] **FE-035** — Integrar login com API *(Prioridade: Alta)*
-- [ ] **FE-036** — Implementar gerenciamento de sessão *(Prioridade: Alta)*
+- [x] **FE-032** — Criar validação de formulário de cadastro *(Prioridade: Alta)*
+- [x] **FE-033** — Criar validação de formulário de login *(Prioridade: Alta)*
+- [x] **FE-034** — Integrar cadastro com API *(Prioridade: Alta)*
+- [x] **FE-035** — Integrar login com API *(Prioridade: Alta)*
+- [x] **FE-036** — Implementar gerenciamento de sessão *(Prioridade: Alta)*
 - [ ] **FE-037** — Implementar renovação de access token *(Prioridade: Alta)*
 - [ ] **FE-038** — Implementar logout *(Prioridade: Alta)*
 - [ ] **FE-039** — Implementar proteção de rotas *(Prioridade: Alta)*
