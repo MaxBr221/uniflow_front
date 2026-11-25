@@ -13,8 +13,8 @@
 | Épico | Título | Versão | Total | Concluídas | Status |
 | --- | --- | --- | ---: | ---: | --- |
 | 1 | Configuração e estrutura do projeto | MVP | 12 | 12 | Concluído (`FE-001`–`FE-012`) |
-| 2 | Design System e componentes | MVP | 17 | 14 | Em andamento (`FE-013`–`FE-026` concluídas) |
-| 3 | Autenticação | MVP | 11 | 0 | Pendente |
+| 2 | Design System e componentes | MVP | 17 | 17 | Concluído (`FE-013`–`FE-029`) |
+| 3 | Autenticação | MVP | 11 | 2 | Em andamento (`FE-030`–`FE-031` concluídas) |
 | 4 | Layout principal e navegação | MVP | 8 | 0 | Pendente |
 | 5 | Dashboard | MVP | 10 | 0 | Pendente |
 | 6 | Semestres | MVP | 8 | 0 | Pendente |
@@ -28,7 +28,7 @@
 | 14 | Planejamento inteligente e IA | 2.0 | 7 | 0 | Pendente |
 | 15 | Monetização | Futura | 6 | 0 | Pendente |
 | 16 | Testes e qualidade | MVP | 9 | 0 | Pendente |
-| **Total** | | | **162** | **26** | |
+| **Total** | | | **162** | **31** | |
 
 ---
 
@@ -65,16 +65,16 @@
 - [x] **FE-024** — Criar componente Badge *(Prioridade: Média)*
 - [x] **FE-025** — Criar componente Toast *(Prioridade: Alta)*
 - [x] **FE-026** — Criar componente Loading *(Prioridade: Alta)*
-- [ ] **FE-027** — Criar componente Empty State *(Prioridade: Alta)*
-- [ ] **FE-028** — Criar componente Error State *(Prioridade: Alta)*
-- [ ] **FE-029** — Criar componentes responsivos *(Prioridade: Alta)*
+- [x] **FE-027** — Criar componente Empty State *(Prioridade: Alta)*
+- [x] **FE-028** — Criar componente Error State *(Prioridade: Alta)*
+- [x] **FE-029** — Criar componentes responsivos *(Prioridade: Alta)*
 
 ---
 
 ## Épico 3: Autenticação
 
-- [ ] **FE-030** — Criar página de cadastro *(Prioridade: Alta)*
-- [ ] **FE-031** — Criar página de login *(Prioridade: Alta)*
+- [x] **FE-030** — Criar página de cadastro *(Prioridade: Alta)*
+- [x] **FE-031** — Criar página de login *(Prioridade: Alta)*
 - [ ] **FE-032** — Criar validação de formulário de cadastro *(Prioridade: Alta)*
 - [ ] **FE-033** — Criar validação de formulário de login *(Prioridade: Alta)*
 - [ ] **FE-034** — Integrar cadastro com API *(Prioridade: Alta)*

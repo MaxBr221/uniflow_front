@@ -4,9 +4,7 @@ import { Loading, Skeleton } from '@/components/Loading.tsx'
 
 describe('Loading', () => {
   it('renderiza variante block padrão com role="status", aria-busy e textos opcionais', () => {
-    render(
-      <Loading description="Buscando suas disciplinas do semestre." />,
-    )
+    render(<Loading description="Buscando suas disciplinas do semestre." />)
 
     const status = screen.getByRole('status')
     expect(status).toHaveAttribute('aria-live', 'polite')
@@ -39,9 +37,9 @@ describe('Loading', () => {
 
     const labeledInline = screen.getByRole('status')
     expect(labeledInline).toHaveTextContent('Salvando alterações...')
-    expect(
-      labeledInline.querySelector('svg')?.getAttribute('class'),
-    ).toContain('text-ink-inverse')
+    expect(labeledInline.querySelector('svg')?.getAttribute('class')).toContain(
+      'text-ink-inverse',
+    )
 
     rerender(
       <Loading
@@ -91,12 +89,14 @@ describe('Loading', () => {
     const bars = multi.querySelectorAll('span[aria-hidden="true"]')
     expect(bars).toHaveLength(3)
     expect(bars[2].className).toContain('w-3/4')
-    expect(
-      screen.getByText('Carregando resumo de atividades'),
-    ).toHaveClass('sr-only')
+    expect(screen.getByText('Carregando resumo de atividades')).toHaveClass(
+      'sr-only',
+    )
 
     rerender(<Skeleton shape="rect" data-testid="skeleton-rect" />)
-    expect(screen.getByTestId('skeleton-rect').className).toContain('rounded-xl')
+    expect(screen.getByTestId('skeleton-rect').className).toContain(
+      'rounded-xl',
+    )
 
     rerender(<Skeleton shape="circle" data-testid="skeleton-circle" />)
     expect(screen.getByTestId('skeleton-circle').className).toContain(

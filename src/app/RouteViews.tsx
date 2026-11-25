@@ -3,6 +3,8 @@ import {
   ArrowLeft,
   Compass,
   GraduationCap,
+  LogIn,
+  UserPlus,
   type LucideIcon,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -86,6 +88,16 @@ export function BaseHomeView() {
       titleId="app-title"
       title="Ambiente base configurado"
       description="Projeto inicializado com React, TypeScript, Vite, Tailwind CSS, React Router, Axios, TanStack Query, React Hook Form, Zod, Lucide React e identidade visual UniFlow."
+      action={
+        <div className={SPACING_CLASSES.inlineGroup}>
+          <ButtonLink to="/login" leftIcon={LogIn}>
+            Entrar
+          </ButtonLink>
+          <ButtonLink to="/cadastro" variant="outline" leftIcon={UserPlus}>
+            Criar conta
+          </ButtonLink>
+        </div>
+      }
     />
   )
 }

@@ -198,3 +198,24 @@ Implementados em `src/components/Loading.tsx` (reexportados em `@/components`):
 - **`Skeleton`:** placeholders animados com `bg-surface-muted` e suporte a `motion-reduce:animate-none`.
   - **Formas (`shape`):** `text` (com suporte a múltiplas `lines` e última linha em `w-3/4`), `rect` e `circle`.
   - **Acessibilidade:** decorativo (`aria-hidden="true"`) por padrão, ou com `role="status"`, `aria-busy="true"` e texto `sr-only` quando `label` é informado.
+
+### `EmptyState` (`FE-027`)
+Implementado em `src/components/EmptyState.tsx` (reexportado em `@/components`):
+- Componente de estado vazio para listas, buscas sem resultado, seções do dashboard e telas ainda sem cadastros.
+- **Variantes, tamanhos e tons:** `variant` (`card` com borda tracejada suave `border-dashed border-border-default` ou `plain` sem caixa externa), `size` (`sm`, `md`, `lg`) e `tone` (`brand` padrão ou `neutral` no medalhão do ícone `Inbox` por padrão, ocultável via `icon={null}`).
+- **Ações responsivas:** aceita `action` (CTA primário via botão ou link React Router `to`), `secondaryAction` (botão/link `outline`), slot livre `actions` e `children`, empilhando os botões em tela cheia no mobile (`w-full sm:w-auto`).
+- **Acessibilidade:** suporte a `as="section"` com vínculo automático de `aria-labelledby`, `headingAs` (`h2`, `h3`, `h4`) e ícone puramente decorativo (`aria-hidden="true"`).
+
+### `ErrorState` (`FE-028`)
+Implementado em `src/components/ErrorState.tsx` (compartilhando primitivos de layout em `src/components/FeedbackState.tsx` com `EmptyState` e reexportado em `@/components`):
+- **Variantes (`variant`) e tons (`tone`):** `card` (padrão com borda semântica), `plain` (embutido sem borda externa) e `banner` (alerta horizontal compacto ideal para erros de formulário/API), nos tons `danger` (`role="alert"`) e `warning` (`role="status"`).
+- **Normalização automática de erro (`error`):** integra com `normalizeHttpError` de `@/services/httpClient.ts`, ajustando título, mensagem amigável, ícone (`WifiOff`, `ShieldAlert`, `AlertCircle`, `AlertTriangle`) e `Badge` técnico opcional para status/código HTTP.
+- **Recuperação (`onRetry`):** botão nativo de nova tentativa (`Tentar novamente`) com estado `isRetrying`, além de suporte a `action`, `secondaryAction` (botão ou link React Router), `actions` e `children`.
+
+### Componentes Responsivos e Breakpoints (`FE-029`)
+Implementados em `src/components/Responsive.tsx`, `src/components/Drawer.tsx` (compartilhando `DialogSurface` com `Modal`) e `src/hooks/useMediaQuery.ts`:
+- **Adaptação em 3 faixas:** celular (`< 640px`), tablet (`640px–1023px`) e desktop (`>= 1024px`), sincronizada por CSS Grid/Flexbox e pelos hooks reativos `useMediaQuery` e `useBreakpoint` (reexportados em `@/hooks`).
+- **`ResponsiveContainer`:** centraliza e limita largura máxima (`narrow`, `compact`, `default` usando `max-w-content`, `wide`, `full`), espaçamento horizontal progressivo e modo `centered` para fluxos focados.
+- **`PageHeader`:** título principal (`h1`/`h2`), `eyebrow`, descrição e barra de ações que empilham no celular (`flex-col`) e alinham lado a lado a partir de `sm`.
+- **`ResponsiveGrid` e `ResponsiveStack`:** grade fluida de 1 até 4 colunas (`1` → `sm:2` → `lg:3` → `xl:4`) e pilha flexível com ponto de quebra configurável (`sm`, `md`, `lg`).
+- **`Drawer`:** painel deslizante lateral ou inferior (`left`, `right`, `bottom`) em portal com largura limitada no celular (`85vw`/`92vw`), aprisionamento de foco, bloqueio de scroll e pilha unificada com `Modal`.
