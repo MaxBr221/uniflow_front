@@ -13,7 +13,7 @@
 | Épico | Título | Versão | Total | Concluídas | Status |
 | --- | --- | --- | ---: | ---: | --- |
 | 1 | Configuração e estrutura do projeto | MVP | 12 | 12 | Concluído (`FE-001`–`FE-012`) |
-| 2 | Design System e componentes | MVP | 17 | 13 | Em andamento (`FE-013`–`FE-025` concluídas) |
+| 2 | Design System e componentes | MVP | 17 | 14 | Em andamento (`FE-013`–`FE-026` concluídas) |
 | 3 | Autenticação | MVP | 11 | 0 | Pendente |
 | 4 | Layout principal e navegação | MVP | 8 | 0 | Pendente |
 | 5 | Dashboard | MVP | 10 | 0 | Pendente |
@@ -28,7 +28,7 @@
 | 14 | Planejamento inteligente e IA | 2.0 | 7 | 0 | Pendente |
 | 15 | Monetização | Futura | 6 | 0 | Pendente |
 | 16 | Testes e qualidade | MVP | 9 | 0 | Pendente |
-| **Total** | | | **162** | **25** | |
+| **Total** | | | **162** | **26** | |
 
 ---
 
@@ -64,7 +64,7 @@
 - [x] **FE-023** — Criar componente Card *(Prioridade: Alta)*
 - [x] **FE-024** — Criar componente Badge *(Prioridade: Média)*
 - [x] **FE-025** — Criar componente Toast *(Prioridade: Alta)*
-- [ ] **FE-026** — Criar componente Loading *(Prioridade: Alta)*
+- [x] **FE-026** — Criar componente Loading *(Prioridade: Alta)*
 - [ ] **FE-027** — Criar componente Empty State *(Prioridade: Alta)*
 - [ ] **FE-028** — Criar componente Error State *(Prioridade: Alta)*
 - [ ] **FE-029** — Criar componentes responsivos *(Prioridade: Alta)*

@@ -189,3 +189,12 @@ Implementado com separação limpa entre store reativa (`src/lib/toast.ts`), hoo
 - **Variantes (`variant`):** `info` (`role="status"`), `success` (`role="status"`), `warning` (`role="status"`) e `error` (`role="alert"` com `aria-live="assertive"`), exibidos sobre `surface-card` com bordas e emblema semântico.
 - **Posicionamento responsivo (`position`):** `top-right` (padrão), `top-center`, `bottom-right` e `bottom-center`, ocupando a largura útil com margem segura em telas móveis e largura limitada (`max-w-sm`/`max-w-md`) em tablet/desktop em camada `z-60` (acima de modais).
 - **Comportamento:** fila limitada por `maxVisible` (padrão `4`), deduplicação/atualização por `id`, botão opcional de ação (`action`), fechamento manual (`dismissible`), auto-dismiss configurável (`5000ms` padrão ou `0` para persistente) e pausa automática no `hover`/`focus`.
+
+### `Loading` e `Skeleton` (`FE-026`)
+Implementados em `src/components/Loading.tsx` (reexportados em `@/components`):
+- **`Loading`:** indicador de carregamento com `role="status"`, `aria-live="polite"` e `aria-busy="true"`.
+  - **Variantes (`variant`):** `inline` (compacto para botões/linhas), `block` (padrão para cards e seções), `fullscreen` (tela cheia com `min-h-svh`, `bg-surface-canvas` e `showBrand` opcional) e `overlay` (camada translúcida `absolute inset-0` sobre containers).
+  - **Tamanhos (`size`) e tons (`tone`):** `sm`, `md`, `lg` e `brand` (padrão), `neutral`, `inverse`. Quando não há `label` visível (ou `label=""`), preserva descrição acessível via `sr-only` (`ariaLabel`).
+- **`Skeleton`:** placeholders animados com `bg-surface-muted` e suporte a `motion-reduce:animate-none`.
+  - **Formas (`shape`):** `text` (com suporte a múltiplas `lines` e última linha em `w-3/4`), `rect` e `circle`.
+  - **Acessibilidade:** decorativo (`aria-hidden="true"`) por padrão, ou com `role="status"`, `aria-busy="true"` e texto `sr-only` quando `label` é informado.
