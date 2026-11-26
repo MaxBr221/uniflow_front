@@ -2,10 +2,13 @@ import { AxiosError, AxiosHeaders, type AxiosAdapter } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   loginUser,
+  refreshAuthTokens,
   registerUser,
   toLoginRequest,
+  toRefreshTokenRequest,
   toRegisterRequest,
 } from '@/features/auth/services/authService.ts'
+import { authSession } from '@/features/auth/session/authSession.ts'
 import type {
   AuthTokenResponse,
   AuthUserResponse,
@@ -161,5 +164,55 @@ describe('authService', () => {
       expect(caughtError.code).toBe('AUTHENTICATION_FAILED')
       expect(caughtError.message).toBe('Credenciais inválidas.')
     }
+  })
+
+  it('refreshAuthTokens envia POST /auth/refresh sem Authorization Bearer e valida refreshToken não vazio', async () => {
+    expect(() => toRefreshTokenRequest('   ')).toThrow(
+      /Refresh token é obrigatório/,
+    )
+
+    const rotatedResponse: AuthTokenResponse = {
+      accessToken: 'jwt-rotated-2',
+      refreshToken: 'rft-rotated-2',
+      expiresIn: 900,
+      tokenType: 'Bearer',
+      usuario: {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        nome: 'Ana Silva',
+        email: 'ana.silva@uniflow.edu',
+        status: 'ATIVO',
+        createdAt: '2026-11-25T11:50:00Z',
+        updatedAt: '2026-11-25T11:50:00Z',
+      },
+    }
+
+    authSession.setSession({
+      ...rotatedResponse,
+      accessToken: 'jwt-expired-1',
+      refreshToken: 'rft-initial-1',
+    })
+
+    const adapterSpy = vi.fn<AxiosAdapter>(async (config) => ({
+      data: JSON.stringify(rotatedResponse),
+      status: 200,
+      statusText: 'OK',
+      headers: new AxiosHeaders({ 'Content-Type': 'application/json' }),
+      config,
+    }))
+    httpClient.defaults.adapter = adapterSpy
+
+    const result = await refreshAuthTokens({
+      refreshToken: '  rft-initial-1  ',
+    })
+
+    expect(adapterSpy).toHaveBeenCalledTimes(1)
+    const sentConfig = adapterSpy.mock.calls[0]?.[0]
+    expect(sentConfig?.method).toBe('post')
+    expect(sentConfig?.url).toBe('/auth/refresh')
+    expect(sentConfig?.headers.has('Authorization')).toBe(false)
+    expect(JSON.parse(String(sentConfig?.data))).toEqual({
+      refreshToken: 'rft-initial-1',
+    })
+    expect(result).toEqual(rotatedResponse)
   })
 })

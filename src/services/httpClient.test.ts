@@ -224,4 +224,124 @@ describe('httpClient helpers and interceptors', () => {
       isNetworkError: true,
     })
   })
+
+  it('deduplica refresh single-flight em múltiplas requisições 401 concorrentes e reexecuta todas com o novo token', async () => {
+    let currentToken = 'expired-jwt'
+    const onUnauthorized = vi.fn()
+    const refreshAccessToken = vi.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 15))
+      currentToken = 'fresh-jwt'
+      return currentToken
+    })
+
+    configureHttpClientAuth({
+      getAccessToken: () => currentToken,
+      refreshAccessToken,
+      onUnauthorized,
+    })
+
+    const client = createHttpClient({
+      adapter: async (config) => {
+        const auth = config.headers.get('Authorization')
+        if (auth !== 'Bearer fresh-jwt') {
+          throw createProblemError(config, 401, {
+            status: 401,
+            detail: 'Access token expirado.',
+            code: 'AUTHENTICATION_FAILED',
+          })
+        }
+        return createJsonResponse(config, 200, { path: config.url })
+      },
+    })
+
+    const [r1, r2, r3] = await Promise.all([
+      client.get<{ path: string }>('/semestres'),
+      client.get<{ path: string }>('/disciplinas'),
+      client.get<{ path: string }>('/atividades'),
+    ])
+
+    expect(refreshAccessToken).toHaveBeenCalledTimes(1)
+    expect(onUnauthorized).not.toHaveBeenCalled()
+    expect(r1.data).toEqual({ path: '/semestres' })
+    expect(r2.data).toEqual({ path: '/disciplinas' })
+    expect(r3.data).toEqual({ path: '/atividades' })
+  })
+
+  it('evita loop infinito se a requisição reexecutada após refresh continuar retornando 401', async () => {
+    const onUnauthorized = vi.fn()
+    const refreshAccessToken = vi.fn(async () => 'fresh-jwt-still-rejected')
+
+    configureHttpClientAuth({
+      getAccessToken: () => 'expired-jwt',
+      refreshAccessToken,
+      onUnauthorized,
+    })
+
+    const adapterSpy = vi.fn<AxiosAdapter>(async (config) => {
+      throw createProblemError(config, 401, {
+        status: 401,
+        detail: 'Acesso revogado.',
+        code: 'AUTHENTICATION_FAILED',
+      })
+    })
+
+    const client = createHttpClient({ adapter: adapterSpy })
+
+    await expect(client.get('/semestres')).rejects.toMatchObject({
+      status: 401,
+      code: 'AUTHENTICATION_FAILED',
+    })
+
+    expect(refreshAccessToken).toHaveBeenCalledTimes(1)
+    expect(adapterSpy).toHaveBeenCalledTimes(2)
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+  })
+
+  it('dispara onUnauthorized exatamente uma vez quando refresh proativo falha por 401 e não dispara em falha de rede', async () => {
+    const onUnauthorized = vi.fn()
+    const adapterSpy = vi.fn<AxiosAdapter>(async (config) =>
+      createJsonResponse(config, 200, { ok: true }),
+    )
+
+    configureHttpClientAuth({
+      getAccessToken: () => 'expiring-jwt',
+      shouldRefreshToken: () => true,
+      refreshAccessToken: async () => {
+        throw new HttpClientError('Refresh inválido.', {
+          status: 401,
+          code: 'AUTHENTICATION_FAILED',
+          isNetworkError: false,
+        })
+      },
+      onUnauthorized,
+    })
+
+    const client = createHttpClient({ adapter: adapterSpy })
+
+    await expect(client.get('/semestres')).rejects.toMatchObject({
+      status: 401,
+      code: 'AUTHENTICATION_FAILED',
+    })
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+    expect(adapterSpy).not.toHaveBeenCalled()
+
+    onUnauthorized.mockClear()
+    configureHttpClientAuth({
+      getAccessToken: () => 'expiring-jwt',
+      shouldRefreshToken: () => true,
+      refreshAccessToken: async () => {
+        throw new HttpClientError('Sem rede', {
+          status: null,
+          code: AxiosError.ERR_NETWORK,
+          isNetworkError: true,
+        })
+      },
+      onUnauthorized,
+    })
+
+    await expect(client.get('/semestres')).rejects.toMatchObject({
+      isNetworkError: true,
+    })
+    expect(onUnauthorized).not.toHaveBeenCalled()
+  })
 })

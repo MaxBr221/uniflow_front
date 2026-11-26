@@ -6,6 +6,7 @@ import {
   bindAuthSessionEffects,
   createAuthSessionManager,
   initializeAuthHttpClient,
+  refreshAuthSession,
 } from '@/features/auth/session/authSession.ts'
 import type { AuthTokenResponse } from '@/features/auth/types/authTypes.ts'
 import { createQueryClient } from '@/lib/queryClient.ts'
@@ -292,5 +293,201 @@ describe('authSession', () => {
       tabA.destroy()
       tabB.destroy()
     }
+  })
+
+  it('renova accessToken e rotaciona refreshToken em memória via POST /auth/refresh ao receber 401 concorrente sem limpar cache', async () => {
+    localStorage.clear()
+    sessionStorage.clear()
+
+    const queryClient = createQueryClient()
+    const unbind = bindAuthSessionEffects(queryClient)
+    queryClient.setQueryData(['cached-semestres'], ['2026.2'])
+    authSession.setSession(sampleTokenPayload)
+
+    let refreshCallCount = 0
+    const rotatedPayload: AuthTokenResponse = {
+      ...sampleTokenPayload,
+      accessToken: 'jwt-rotated-2',
+      refreshToken: 'rft-rotated-2',
+    }
+
+    httpClient.defaults.adapter = async (config) => {
+      if (config.url === '/auth/refresh') {
+        refreshCallCount += 1
+        expect(config.headers.has('Authorization')).toBe(false)
+        expect(JSON.parse(String(config.data))).toEqual({
+          refreshToken: 'rft-opaque-token',
+        })
+        await new Promise((resolve) => setTimeout(resolve, 10))
+        return {
+          data: JSON.stringify(rotatedPayload),
+          status: 200,
+          statusText: 'OK',
+          headers: new AxiosHeaders({ 'Content-Type': 'application/json' }),
+          config,
+        }
+      }
+
+      const authHeader = config.headers.get('Authorization')
+      if (authHeader !== 'Bearer jwt-rotated-2') {
+        throw new AxiosError(
+          'Expired JWT',
+          AxiosError.ERR_BAD_REQUEST,
+          config,
+          undefined,
+          {
+            data: JSON.stringify({
+              status: 401,
+              detail: 'Token expirado.',
+              code: 'AUTHENTICATION_FAILED',
+            }),
+            status: 401,
+            statusText: 'Unauthorized',
+            headers: new AxiosHeaders({
+              'Content-Type': 'application/problem+json',
+            }),
+            config,
+          },
+        )
+      }
+
+      return {
+        data: JSON.stringify({ endpoint: config.url }),
+        status: 200,
+        statusText: 'OK',
+        headers: new AxiosHeaders({ 'Content-Type': 'application/json' }),
+        config,
+      }
+    }
+
+    const [semestresRes, disciplinasRes] = await Promise.all([
+      httpClient.get<{ endpoint: string }>('/semestres'),
+      httpClient.get<{ endpoint: string }>('/disciplinas'),
+    ])
+
+    expect(refreshCallCount).toBe(1)
+    expect(semestresRes.data).toEqual({ endpoint: '/semestres' })
+    expect(disciplinasRes.data).toEqual({ endpoint: '/disciplinas' })
+    expect(authSession.getAccessToken()).toBe('jwt-rotated-2')
+    expect(authSession.getRefreshToken()).toBe('rft-rotated-2')
+    expect(queryClient.getQueryData(['cached-semestres'])).toEqual(['2026.2'])
+    expect(toastStore.getSnapshot()).toHaveLength(0)
+    expect(localStorage).toHaveLength(0)
+    expect(sessionStorage).toHaveLength(0)
+
+    unbind()
+    queryClient.clear()
+  })
+
+  it('renova proativamente antes de disparar requisição quando o accessToken entra na janela de expiração', async () => {
+    let nowMs = 1_000_000
+    const customManager = createAuthSessionManager({
+      channelName: null,
+      now: () => nowMs,
+    })
+
+    try {
+      initializeAuthHttpClient({ session: customManager })
+      customManager.setSession({
+        ...sampleTokenPayload,
+        expiresIn: 900,
+      })
+
+      // Faltam 20s para expirar (dentro do buffer padrão de 30s)
+      nowMs = 1_880_000
+
+      const requestOrder: string[] = []
+      httpClient.defaults.adapter = async (config) => {
+        requestOrder.push(`${config.method}:${config.url}`)
+        if (config.url === '/auth/refresh') {
+          return {
+            data: JSON.stringify({
+              ...sampleTokenPayload,
+              accessToken: 'jwt-proactive-2',
+              refreshToken: 'rft-proactive-2',
+              expiresIn: 900,
+            }),
+            status: 200,
+            statusText: 'OK',
+            headers: new AxiosHeaders({ 'Content-Type': 'application/json' }),
+            config,
+          }
+        }
+
+        expect(config.headers.get('Authorization')).toBe(
+          'Bearer jwt-proactive-2',
+        )
+        return {
+          data: JSON.stringify({ ok: true }),
+          status: 200,
+          statusText: 'OK',
+          headers: new AxiosHeaders({ 'Content-Type': 'application/json' }),
+          config,
+        }
+      }
+
+      const response = await httpClient.get<{ ok: boolean }>('/atividades')
+      expect(response.data).toEqual({ ok: true })
+      expect(requestOrder).toEqual(['post:/auth/refresh', 'get:/atividades'])
+      expect(customManager.getAccessToken()).toBe('jwt-proactive-2')
+      expect(customManager.getRefreshToken()).toBe('rft-proactive-2')
+    } finally {
+      customManager.destroy()
+    }
+  })
+
+  it('preserva refreshToken em falha transitória de rede no refresh e não ressuscita sessão encerrada durante refresh em voo', async () => {
+    authSession.setSession(sampleTokenPayload)
+
+    httpClient.defaults.adapter = async (config) => {
+      if (config.url === '/auth/refresh') {
+        throw new AxiosError('Offline', AxiosError.ERR_NETWORK, config)
+      }
+      throw new AxiosError(
+        'Unauthorized',
+        AxiosError.ERR_BAD_REQUEST,
+        config,
+        undefined,
+        {
+          data: JSON.stringify({
+            status: 401,
+            detail: 'Token expirado.',
+            code: 'AUTHENTICATION_FAILED',
+          }),
+          status: 401,
+          statusText: 'Unauthorized',
+          headers: new AxiosHeaders({
+            'Content-Type': 'application/problem+json',
+          }),
+          config,
+        },
+      )
+    }
+
+    await expect(httpClient.get('/semestres')).rejects.toMatchObject({
+      isNetworkError: true,
+    })
+    expect(authSession.isAuthenticated()).toBe(true)
+    expect(authSession.getRefreshToken()).toBe('rft-opaque-token')
+
+    // Corrida com logout explícito enquanto refresh está em andamento
+    let resolveDeferredRefresh: ((value: AuthTokenResponse) => void) | undefined
+    const pendingRefresh = refreshAuthSession({
+      refreshTokensFn: () =>
+        new Promise<AuthTokenResponse>((resolve) => {
+          resolveDeferredRefresh = resolve
+        }),
+    })
+
+    authSession.clear('logout')
+    resolveDeferredRefresh?.({
+      ...sampleTokenPayload,
+      accessToken: 'jwt-should-not-restore',
+      refreshToken: 'rft-should-not-restore',
+    })
+
+    expect(await pendingRefresh).toBeNull()
+    expect(authSession.isAuthenticated()).toBe(false)
+    expect(authSession.getRefreshToken()).toBeNull()
   })
 })

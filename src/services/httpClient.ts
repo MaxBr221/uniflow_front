@@ -2,8 +2,16 @@ import axios, {
   type AxiosError,
   type AxiosInstance,
   type CreateAxiosDefaults,
+  type InternalAxiosRequestConfig,
 } from 'axios'
 import { env } from '@/lib/env.ts'
+
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuthHeader?: boolean
+    skipAuthRefresh?: boolean
+  }
+}
 
 export const API_PREFIX = '/api/v1'
 
@@ -39,6 +47,10 @@ export class HttpClientError extends Error {
 export interface HttpAuthHandlers {
   /** Must return only an in-memory access token; never read refresh tokens from localStorage. */
   getAccessToken?: () => string | null
+  /** Optional check to proactively refresh an expiring access token before sending a request. */
+  shouldRefreshToken?: () => boolean
+  /** Rotates the session via /auth/refresh and returns the new access token, or null when unavailable. */
+  refreshAccessToken?: () => Promise<string | null>
   onUnauthorized?: (error: HttpClientError) => void
 }
 
@@ -168,6 +180,26 @@ export function normalizeHttpError(error: unknown): HttpClientError {
   })
 }
 
+const PUBLIC_AUTH_NO_REFRESH_PATHS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/refresh',
+] as const
+
+type RetriableRequestConfig = InternalAxiosRequestConfig & {
+  _authRetried?: boolean
+}
+
+function isAuthRefreshExcluded(config: InternalAxiosRequestConfig): boolean {
+  if (config.skipAuthRefresh) {
+    return true
+  }
+  const rawPath = (config.url ?? '').split('?')[0] ?? ''
+  return PUBLIC_AUTH_NO_REFRESH_PATHS.some(
+    (path) => rawPath === path || rawPath.endsWith(path),
+  )
+}
+
 export function createHttpClient(
   config: CreateAxiosDefaults = {},
 ): AxiosInstance {
@@ -180,26 +212,100 @@ export function createHttpClient(
     ...config,
   })
 
-  instance.interceptors.request.use((requestConfig) => {
-    const token = authHandlers.getAccessToken?.()
-    if (
-      token &&
-      token.trim().length > 0 &&
-      !requestConfig.headers.has('Authorization')
-    ) {
-      requestConfig.headers.setAuthorization(`Bearer ${token.trim()}`)
+  let inFlightRefresh: Promise<string | null> | null = null
+
+  async function executeSingleFlightRefresh(): Promise<string | null> {
+    if (!authHandlers.refreshAccessToken) {
+      return null
     }
+
+    if (!inFlightRefresh) {
+      const refreshFn = authHandlers.refreshAccessToken
+      inFlightRefresh = (async () => {
+        try {
+          return (await refreshFn()) ?? null
+        } catch (refreshError) {
+          const normalizedRefreshError = normalizeHttpError(refreshError)
+          if (
+            normalizedRefreshError.status === 400 ||
+            normalizedRefreshError.status === 401 ||
+            normalizedRefreshError.status === 403
+          ) {
+            authHandlers.onUnauthorized?.(normalizedRefreshError)
+          }
+          throw normalizedRefreshError
+        } finally {
+          inFlightRefresh = null
+        }
+      })()
+    }
+
+    return inFlightRefresh
+  }
+
+  instance.interceptors.request.use(async (requestConfig) => {
+    if (requestConfig.skipAuthHeader) {
+      requestConfig.headers.delete('Authorization')
+      return requestConfig
+    }
+
+    if (!requestConfig.headers.has('Authorization')) {
+      if (
+        !isAuthRefreshExcluded(requestConfig) &&
+        authHandlers.shouldRefreshToken?.() &&
+        authHandlers.refreshAccessToken
+      ) {
+        await executeSingleFlightRefresh()
+      }
+
+      const token = authHandlers.getAccessToken?.()
+      if (token && token.trim().length > 0) {
+        requestConfig.headers.setAuthorization(`Bearer ${token.trim()}`)
+      }
+    }
+
     return requestConfig
   })
 
   instance.interceptors.response.use(
     (response) => response,
-    (error: unknown) => {
-      const normalized = normalizeHttpError(error)
-      if (normalized.status === 401) {
-        authHandlers.onUnauthorized?.(normalized)
+    async (error: unknown) => {
+      if (error instanceof HttpClientError) {
+        return Promise.reject(error)
       }
-      return Promise.reject(normalized)
+
+      const normalized = normalizeHttpError(error)
+      if (normalized.status !== 401) {
+        return Promise.reject(normalized)
+      }
+
+      const originalConfig = axios.isAxiosError(error)
+        ? (error.config as RetriableRequestConfig | undefined)
+        : undefined
+
+      if (originalConfig?.skipAuthRefresh) {
+        return Promise.reject(normalized)
+      }
+
+      if (
+        !originalConfig ||
+        originalConfig._authRetried ||
+        isAuthRefreshExcluded(originalConfig) ||
+        !authHandlers.refreshAccessToken
+      ) {
+        authHandlers.onUnauthorized?.(normalized)
+        return Promise.reject(normalized)
+      }
+
+      const refreshedToken = await executeSingleFlightRefresh()
+      if (!refreshedToken || refreshedToken.trim().length === 0) {
+        authHandlers.onUnauthorized?.(normalized)
+        return Promise.reject(normalized)
+      }
+
+      originalConfig._authRetried = true
+      originalConfig.headers.setAuthorization(`Bearer ${refreshedToken.trim()}`)
+      return instance.request(originalConfig)
     },
   )
 
@@ -207,9 +313,8 @@ export function createHttpClient(
 }
 
 /**
- * Shared Axios instance for API communication.
- * `withCredentials`, final `baseURL`, and token refresh interceptors (`FE-037`)
- * should be aligned with `docs/API_CONTRACT.md` once provided.
+ * Shared Axios instance for API communication with Bearer injection
+ * and single-flight access token refresh (`FE-037`).
  */
 export const httpClient: AxiosInstance = createHttpClient()
 

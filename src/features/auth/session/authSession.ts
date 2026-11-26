@@ -1,7 +1,9 @@
 import type { QueryClient } from '@tanstack/react-query'
+import { refreshAuthTokens } from '@/features/auth/services/authService.ts'
 import type {
   AuthTokenResponse,
   AuthUserResponse,
+  RefreshTokenRequest,
 } from '@/features/auth/types/authTypes.ts'
 import { toast } from '@/lib/toast.ts'
 import {
@@ -214,7 +216,9 @@ export function createAuthSessionManager(
     currentSession?.accessToken ?? null
 
   const getRefreshToken = (): string | null =>
-    currentSession?.refreshToken ?? null
+    currentSession && currentSession.refreshToken.length > 0
+      ? currentSession.refreshToken
+      : null
 
   const isAuthenticated = (): boolean =>
     currentSession !== null && currentSession.accessToken.length > 0
@@ -364,8 +368,67 @@ export const authSession: AuthSessionManager = createAuthSessionManager({
   channelName: resolveDefaultChannelName(),
 })
 
+const inFlightSessionRefreshes = new WeakMap<
+  AuthSessionManager,
+  Promise<AuthSessionState | null>
+>()
+
+export function shouldProactivelyRefreshSession(
+  manager: AuthSessionManager = authSession,
+  bufferMs: number = DEFAULT_EXPIRY_BUFFER_MS,
+): boolean {
+  const snapshot = manager.getSnapshot()
+  if (!snapshot || snapshot.refreshToken.length === 0) {
+    return false
+  }
+  if (snapshot.expiresIn <= 0) {
+    return false
+  }
+  const halfLifetimeMs = Math.floor((snapshot.expiresIn * 1000) / 2)
+  const effectiveBufferMs = Math.min(Math.max(0, bufferMs), halfLifetimeMs)
+  return manager.isAccessTokenExpired(effectiveBufferMs)
+}
+
+export interface RefreshAuthSessionOptions {
+  session?: AuthSessionManager
+  refreshTokensFn?: (payload: RefreshTokenRequest) => Promise<AuthTokenResponse>
+}
+
+export function refreshAuthSession(
+  options: RefreshAuthSessionOptions = {},
+): Promise<AuthSessionState | null> {
+  const manager = options.session ?? authSession
+  const existingPromise = inFlightSessionRefreshes.get(manager)
+  if (existingPromise) {
+    return existingPromise
+  }
+
+  const refreshToken = manager.getRefreshToken()
+  if (!refreshToken) {
+    return Promise.resolve(null)
+  }
+
+  const performRefresh = options.refreshTokensFn ?? refreshAuthTokens
+  const refreshPromise = (async () => {
+    try {
+      const tokenResponse = await performRefresh({ refreshToken })
+      if (manager.getRefreshToken() === null) {
+        return null
+      }
+      return manager.setSession(tokenResponse)
+    } finally {
+      inFlightSessionRefreshes.delete(manager)
+    }
+  })()
+
+  inFlightSessionRefreshes.set(manager, refreshPromise)
+  return refreshPromise
+}
+
 export interface InitializeAuthHttpClientOptions {
   session?: AuthSessionManager
+  refreshTokensFn?: (payload: RefreshTokenRequest) => Promise<AuthTokenResponse>
+  proactiveRefreshBufferMs?: number
   onUnauthorized?: (error: HttpClientError) => void
 }
 
@@ -373,9 +436,19 @@ export function initializeAuthHttpClient(
   options: InitializeAuthHttpClientOptions = {},
 ): void {
   const manager = options.session ?? authSession
+  const bufferMs = options.proactiveRefreshBufferMs ?? DEFAULT_EXPIRY_BUFFER_MS
 
   configureHttpClientAuth({
     getAccessToken: () => manager.getAccessToken(),
+    shouldRefreshToken: () =>
+      shouldProactivelyRefreshSession(manager, bufferMs),
+    refreshAccessToken: async () => {
+      const refreshedSession = await refreshAuthSession({
+        session: manager,
+        refreshTokensFn: options.refreshTokensFn,
+      })
+      return refreshedSession?.accessToken ?? null
+    },
     onUnauthorized: (error) => {
       const hadActiveSession = manager.clear('unauthorized')
       if (hadActiveSession) {

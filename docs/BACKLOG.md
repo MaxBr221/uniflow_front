@@ -14,7 +14,7 @@
 | --- | --- | --- | ---: | ---: | --- |
 | 1 | Configuração e estrutura do projeto | MVP | 12 | 12 | Concluído (`FE-001`–`FE-012`) |
 | 2 | Design System e componentes | MVP | 17 | 17 | Concluído (`FE-013`–`FE-029`) |
-| 3 | Autenticação | MVP | 11 | 7 | Em andamento (`FE-030`–`FE-036` concluídas) |
+| 3 | Autenticação | MVP | 11 | 8 | Em andamento (`FE-030`–`FE-037` concluídas) |
 | 4 | Layout principal e navegação | MVP | 8 | 0 | Pendente |
 | 5 | Dashboard | MVP | 10 | 0 | Pendente |
 | 6 | Semestres | MVP | 8 | 0 | Pendente |
@@ -28,7 +28,7 @@
 | 14 | Planejamento inteligente e IA | 2.0 | 7 | 0 | Pendente |
 | 15 | Monetização | Futura | 6 | 0 | Pendente |
 | 16 | Testes e qualidade | MVP | 9 | 0 | Pendente |
-| **Total** | | | **162** | **36** | |
+| **Total** | | | **162** | **37** | |
 
 ---
 
@@ -80,7 +80,7 @@
 - [x] **FE-034** — Integrar cadastro com API *(Prioridade: Alta)*
 - [x] **FE-035** — Integrar login com API *(Prioridade: Alta)*
 - [x] **FE-036** — Implementar gerenciamento de sessão *(Prioridade: Alta)*
-- [ ] **FE-037** — Implementar renovação de access token *(Prioridade: Alta)*
+- [x] **FE-037** — Implementar renovação de access token *(Prioridade: Alta)*
 - [ ] **FE-038** — Implementar logout *(Prioridade: Alta)*
 - [ ] **FE-039** — Implementar proteção de rotas *(Prioridade: Alta)*
 - [ ] **FE-040** — Criar página de recuperação de senha *(Prioridade: Média)*

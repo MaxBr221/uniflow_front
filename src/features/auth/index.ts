@@ -28,8 +28,10 @@ export {
 } from '@/features/auth/schemas/authSchemas.ts'
 export {
   loginUser,
+  refreshAuthTokens,
   registerUser,
   toLoginRequest,
+  toRefreshTokenRequest,
   toRegisterRequest,
 } from '@/features/auth/services/authService.ts'
 export {
@@ -39,6 +41,8 @@ export {
   createAuthSessionManager,
   DEFAULT_EXPIRY_BUFFER_MS,
   initializeAuthHttpClient,
+  refreshAuthSession,
+  shouldProactivelyRefreshSession,
   type AuthSessionEndReason,
   type AuthSessionEvent,
   type AuthSessionManager,
@@ -47,6 +51,7 @@ export {
   type BindAuthSessionEffectsOptions,
   type CreateAuthSessionManagerOptions,
   type InitializeAuthHttpClientOptions,
+  type RefreshAuthSessionOptions,
 } from '@/features/auth/session/authSession.ts'
 export type {
   AuthTokenResponse,

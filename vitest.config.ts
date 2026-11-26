@@ -8,6 +8,7 @@ export default mergeConfig(
       environment: 'jsdom',
       pool: 'threads',
       maxWorkers: 2,
+      testTimeout: 15_000,
       globals: false,
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}'],

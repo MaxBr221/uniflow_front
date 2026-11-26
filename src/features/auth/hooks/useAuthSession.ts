@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import {
   authSession,
+  refreshAuthSession,
   type AuthSessionEndReason,
   type AuthSessionManager,
   type AuthSessionState,
@@ -16,6 +17,7 @@ export interface UseAuthSessionResult {
   accessToken: string | null
   expiresAt: number | null
   isAccessTokenExpired: (bufferMs?: number) => boolean
+  refreshSession: () => Promise<AuthSessionState | null>
   clearSession: (reason?: AuthSessionEndReason) => boolean
 }
 
@@ -38,6 +40,7 @@ export function useAuthSession(
     accessToken: session?.accessToken ?? null,
     expiresAt: session?.expiresAt ?? null,
     isAccessTokenExpired: manager.isAccessTokenExpired,
+    refreshSession: () => refreshAuthSession({ session: manager }),
     clearSession: manager.clear,
   }
 }
